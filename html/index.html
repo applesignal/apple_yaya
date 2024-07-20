@@ -1,31 +1,29 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>妞妞撲克牌遊戲</title>
-    <style>
-        /* CSS 將在這裡 */
-    </style>
+    <title>妞妞撲克</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
+    <div id="poker-table">
         <div id="dealer-area">
-            <h2>莊家</h2>
-            <div id="dealer-cards"></div>
-            <div id="dealer-bank"></div>
+            <div class="card-slot" id="dealer-card-1"></div>
+            <div class="card-slot" id="dealer-card-2"></div>
+            <div class="card-slot" id="dealer-card-3"></div>
+            <div class="card-slot" id="dealer-card-4"></div>
+            <div class="card-slot" id="dealer-card-5"></div>
         </div>
-        <div id="players-area">
-            <!-- 玩家區域將動態生成 -->
-        </div>
-        <div id="controls">
-            <button id="bet-button">下注</button>
-            <button id="multiply-button">增加倍數</button>
-            <button id="become-dealer-button">成為莊家</button>
+        <div id="player-areas">
+            <!-- 動態生成玩家區域 -->
         </div>
     </div>
-    <script>
-        // JavaScript 將在這裡
-    </script>
+    <div id="controls">
+        <button id="bet-button">下注</button>
+        <button id="multiplier-button">設置倍數</button>
+        <button id="ready-button">準備</button>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>

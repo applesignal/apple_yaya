@@ -1,30 +1,21 @@
 Config = {}
 
--- 遊戲設置
+Config.TablePositions = {
+    {x = 1000.0, y = 2000.0, z = 30.0},
+    {x = 1010.0, y = 2010.0, z = 30.0},
+    -- 添加更多賭桌位置
+}
+
 Config.MaxPlayers = 9
-Config.MinBankForDealer = 10000
-Config.TaxPercentage = 5
+Config.MinBankBalance = 1000000 -- 上莊最低資產要求
+Config.HouseEdgePercentage = 5 -- 每局抽取的公款百分比
 
--- 倍數設置
 Config.Multipliers = {
-    bull7 = 2,
-    bull8 = 2,
-    bull9 = 3,
-    bullbull = 5
+    [7] = 2,
+    [8] = 2,
+    [9] = 3,
+    [10] = 5 -- 牛牛
 }
 
--- 籌碼道具
-Config.ChipItem = 'casino_chip'
-
--- 賭桌位置
-Config.GameLocations = {
-    {x = 1111.11, y = 2222.22, z = 33.33},
-    {x = 4444.44, y = 5555.55, z = 66.66}
-}
-
--- 下注限制
-Config.MinBet = 100
-Config.MaxBet = 10000
-
--- 莊家最小銀行金額
-Config.MinDealerBank = 100000
+Config.ChipItem = 'casino_chip' -- 籌碼道具名稱
+Config.MaxBet = 1000000 -- 最大下注金額

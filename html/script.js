@@ -1,48 +1,54 @@
-<script>
-    const config = {
-        maxPlayers: 9,
-        minBankForDealer: 10000,
-        taxPercentage: 5,
-        multipliers: {
-            'bull7': 2,
-            'bull8': 2,
-            'bull9': 3,
-            'bullbull': 5
+let currentState = 'waiting';
+
+document.addEventListener('DOMContentLoaded', function() {
+    const betButton = document.getElementById('bet-button');
+    const multiplierButton = document.getElementById('multiplier-button');
+    const readyButton = document.getElementById('ready-button');
+
+    betButton.addEventListener('click', () => {
+        if (currentState === 'betting') {
+            fetch(`https://${GetParentResourceName()}/placeBet`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=UTF-8',
+                },
+                body: JSON.stringify({})
+            });
         }
-    };
+    });
 
-    let currentDealer = null;
-    let players = [];
+    multiplierButton.addEventListener('click', () => {
+        if (currentState === 'playing') {
+            fetch(`https://${GetParentResourceName()}/setMultiplier`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=UTF-8',
+                },
+                body: JSON.stringify({})
+            });
+        }
+    });
 
-    function initializeGame() {
-        // 初始化遊戲
+    readyButton.addEventListener('click', () => {
+        fetch(`https://${GetParentResourceName()}/ready`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+            },
+            body: JSON.stringify({})
+        });
+    });
+});
+
+window.addEventListener('message', (event) => {
+    const data = event.data;
+
+    if (data.type === 'updateState') {
+        currentState = data.state;
+        updateUI();
+    } else if (data.type === 'showCards') {
+        showCards(data.cards);
     }
+});
 
-    function placeBet() {
-        // 下注邏輯
-    }
-
-    function multiplyBet() {
-        // 增加倍數邏輯
-    }
-
-    function becomeDealer() {
-        // 成為莊家邏輯
-    }
-
-    function dealCards() {
-        // 發牌邏輯
-    }
-
-    function calculateWinners() {
-        // 計算贏家邏輯
-    }
-
-    // 初始化遊戲
-    initializeGame();
-
-    // 事件監聽器
-    document.getElementById('bet-button').addEventListener('click', placeBet);
-    document.getElementById('multiply-button').addEventListener('click', multiplyBet);
-    document.getElementById('become-dealer-button').addEventListener('click', becomeDealer);
-</script>
+function updateUI()

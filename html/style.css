@@ -1,36 +1,64 @@
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #2c3e50;
-        color: #ecf0f1;
-    }
-    #game-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    #dealer-area, #players-area {
-        background-color: #34495e;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    .player {
-        background-color: #2980b9;
-        border-radius: 5px;
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-    button {
-        background-color: #e74c3c;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        margin: 5px;
-        cursor: pointer;
-        border-radius: 5px;
-    }
-    button:hover {
-        background-color: #c0392b;
-    }
-</style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #2c3e50;
+    color: white;
+}
+
+#poker-table {
+    width: 800px;
+    height: 600px;
+    background-color: #27ae60;
+    border-radius: 200px;
+    margin: 20px auto;
+    position: relative;
+}
+
+#dealer-area {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+}
+
+.card-slot {
+    width: 70px;
+    height: 100px;
+    background-color: #ecf0f1;
+    border: 2px solid #34495e;
+    border-radius: 5px;
+    margin: 0 5px;
+}
+
+#player-areas {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.player-area {
+    text-align: center;
+}
+
+#controls {
+    text-align: center;
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin: 0 10px;
+}
+
+button:hover {
+    background-color: #2980b9;
+}

@@ -1,87 +1,125 @@
-ESX = exports["es_extended"]:getSharedObject()
-local display = false
+local ESX = exports["es_extended"]:getSharedObject()
+local ox_inventory = exports.ox_inventory
 
--- 打開遊戲UI
-RegisterNetEvent('niuNiu:openGame')
-AddEventHandler('niuNiu:openGame', function()
-    SetDisplay(true)
-end)
+local currentTable = nil
+local isBanker = false
+local players = {}
+local bets = {}
+local cards = {}
+local gameState = 'waiting' -- 'waiting', 'betting', 'playing'
 
--- 更新遊戲狀態
-RegisterNetEvent('niuNiu:updateGameState')
-AddEventHandler('niuNiu:updateGameState', function(newState)
-    SendNUIMessage({
-        type = "updateGameState",
-        gameState = newState
+function OpenPokerMenu()
+    lib.registerContext({
+        id = 'poker_menu',
+        title = '妞妞撲克',
+        options = {
+            {
+                title = '加入遊戲',
+                description = '坐下來玩妞妞',
+                onSelect = function()
+                    JoinGame()
+                end
+            },
+            {
+                title = '成為莊家',
+                description = '成為莊家 (需要足夠資金)',
+                onSelect = function()
+                    BecomeBanker()
+                end
+            }
+        }
     })
-end)
-
--- 設置NUI顯示
-function SetDisplay(bool)
-    display = bool
-    SetNuiFocus(bool, bool)
-    SendNUIMessage({
-        type = "setVisible",
-        status = bool,
-    })
+    lib.showContext('poker_menu')
 end
 
--- NUI回調
-RegisterNUICallback("exit", function(data, cb)
-    SetDisplay(false)
-    cb('ok')
-end)
+function JoinGame()
+    if #players >= Config.MaxPlayers then
+        ESX.ShowNotification('桌子已滿')
+        return
+    end
+    
+    local chipCount = ox_inventory:GetItemCount(Config.ChipItem)
+    if chipCount == 0 then
+        ESX.ShowNotification('你沒有籌碼')
+        return
+    end
 
-RegisterNUICallback("joinGame", function(data, cb)
-    TriggerServerEvent("niuNiu:joinGame")
-    cb('ok')
-end)
+    table.insert(players, GetPlayerServerId(PlayerId()))
+    TriggerServerEvent('apple_yaya:joinGame', currentTable)
+    ESX.ShowNotification('你已加入遊戲')
+end
 
-RegisterNUICallback("placeBet", function(data, cb)
-    TriggerServerEvent("niuNiu:placeBet", data.amount)
-    cb('ok')
-end)
+function BecomeBanker()
+    ESX.TriggerServerCallback('apple_yaya:checkBankBalance', function(canBeBanker)
+        if canBeBanker then
+            isBanker = true
+            TriggerServerEvent('apple_yaya:becomeBanker', currentTable)
+            ESX.ShowNotification('你現在是莊家')
+        else
+            ESX.ShowNotification('你的資金不足以成為莊家')
+        end
+    end)
+end
 
-RegisterNUICallback("multiplyBet", function(data, cb)
-    TriggerServerEvent("niuNiu:multiplyBet", data.multiplier)
-    cb('ok')
-end)
+function PlaceBet()
+    if isBanker or gameState ~= 'betting' then return end
 
-RegisterNUICallback("becomeDealer", function(data, cb)
-    TriggerServerEvent("niuNiu:becomeDealer")
-    cb('ok')
-end)
+    local input = lib.inputDialog('下注', {
+        {type = 'number', label = '下注金額', min = 1, max = Config.MaxBet}
+    })
 
--- 創建賭桌標記
-Citizen.CreateThread(function()
-    for _, location in ipairs(Config.GameLocations) do
-        local blip = AddBlipForCoord(location.x, location.y, location.z)
-        SetBlipSprite(blip, 431)
-        SetBlipDisplay(blip, 4)
-        SetBlipScale(blip, 0.8)
-        SetBlipColour(blip, 2)
-        SetBlipAsShortRange(blip, true)
-        BeginTextCommandSetBlipName("STRING")
-        AddTextComponentString("妞妞賭桌")
-        EndTextCommandSetBlipName(blip)
+    if input then
+        local betAmount = input[1]
+        TriggerServerEvent('apple_yaya:placeBet', currentTable, betAmount)
+    end
+end
+
+function SetMultiplier()
+    if isBanker or gameState ~= 'playing' then return end
+
+    local input = lib.inputDialog('設置倍數', {
+        {type = 'number', label = '倍數', min = 1, max = 5}
+    })
+
+    if input then
+        local multiplier = input[1]
+        TriggerServerEvent('apple_yaya:setMultiplier', currentTable, multiplier)
+    end
+end
+
+RegisterNetEvent('apple_yaya:updateGameState')
+AddEventHandler('apple_yaya:updateGameState', function(state)
+    gameState = state
+    if state == 'betting' then
+        ESX.ShowNotification('請下注')
+    elseif state == 'playing' then
+        ESX.ShowNotification('請選擇倍數')
     end
 end)
 
--- 檢查玩家是否在賭桌附近
-Citizen.CreateThread(function()
+RegisterNetEvent('apple_yaya:receiveCards')
+AddEventHandler('apple_yaya:receiveCards', function(playerCards)
+    cards = playerCards
+    -- 在UI上顯示卡牌
+end)
+
+CreateThread(function()
     while true do
-        Citizen.Wait(0)
         local playerPed = PlayerPedId()
         local playerCoords = GetEntityCoords(playerPed)
-        
-        for _, location in ipairs(Config.GameLocations) do
-            local distance = #(playerCoords - vector3(location.x, location.y, location.z))
+
+        for i, tablePos in ipairs(Config.TablePositions) do
+            local distance = #(playerCoords - vector3(tablePos.x, tablePos.y, tablePos.z))
             if distance < 2.0 then
-                ESX.ShowHelpNotification('按 ~INPUT_CONTEXT~ 開始遊戲')
-                if IsControlJustReleased(0, 38) then
-                    TriggerEvent('niuNiu:openGame')
+                currentTable = i
+                ESX.ShowHelpNotification('按 ~INPUT_CONTEXT~ 打開妞妞菜單')
+                if IsControlJustReleased(0, 38) then -- E key
+                    OpenPokerMenu()
                 end
+                break
             end
         end
+
+        Wait(0)
     end
 end)
